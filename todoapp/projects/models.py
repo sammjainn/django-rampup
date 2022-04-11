@@ -1,5 +1,6 @@
 
 from django.db import models
+from django.conf import settings
 
 
 class Project(models.Model):
@@ -13,6 +14,25 @@ class Project(models.Model):
         Add string representation for this model with project name.
     """
 
+    members = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, through='ProjectMember')
+    name = models.CharField(max_length=100, blank=True)
+    max_members = models.PositiveIntegerField(default=0)
+
+    FIRST = 0
+    SECOND = 1
+    THIRD = 2
+    STATUS_CHOICES = (
+        (FIRST, 'To be started'),
+        (SECOND, 'In progress'),
+        (THIRD, 'Completed'),
+    )
+
+    status = models.IntegerField(choices=STATUS_CHOICES, default=FIRST)
+
+    def __str__(self):
+        return self.name
+
 
 class ProjectMember(models.Model):
     """
@@ -24,4 +44,13 @@ class ProjectMember(models.Model):
     Add string representation for this model with project name and user email/first name.
     """
 
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    member = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return self.name + ' ' + self.member.email
+
+    class Meta:
+        constraints = [models.UniqueConstraint(
+            fields=['project', 'member'], name='membership')]
