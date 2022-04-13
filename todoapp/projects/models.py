@@ -49,7 +49,7 @@ class ProjectMember(models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.name + ' ' + self.member.email
+        return self.member.first_name + ' ' + self.member.email
 
     class Meta:
         constraints = [models.UniqueConstraint(
