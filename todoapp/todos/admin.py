@@ -1,6 +1,7 @@
 from django.contrib import admin
 
 from todos.models import Todo
+from projects.models import Project
 
 
 class TodoAdmin(admin.ModelAdmin):
@@ -9,3 +10,4 @@ class TodoAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Todo, TodoAdmin)
+admin.site.register(Project)

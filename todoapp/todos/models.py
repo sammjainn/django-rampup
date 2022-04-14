@@ -4,8 +4,8 @@ from email.policy import default
 from django.db import models
 from django.utils.encoding import smart_text as smart_unicode
 from django.utils.translation import ugettext_lazy as _
-from django.utils import timezone
 from django.conf import settings
+from datetime import datetime
 
 
 class Todo(models.Model):
@@ -24,7 +24,7 @@ class Todo(models.Model):
                              on_delete=models.CASCADE)
     name = models.CharField(max_length=1000)
     done = models.BooleanField(default=False)
-    date_created = models.DateTimeField(default=timezone.now)
+    date_created = models.DateTimeField(default=datetime.now)
     date_completed = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
@@ -32,5 +32,5 @@ class Todo(models.Model):
 
     def set_done(self):
         self.done = True
-        self.date_completed = timezone.now()
+        self.date_completed = datetime.now()
         self.save()
