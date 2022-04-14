@@ -17,11 +17,37 @@ class BaseTodoSerializer(serializers.ModelSerializer):
 
 
 class TodoSerializer(serializers.ModelSerializer):
-    done = serializers.BooleanField()
+    class Meta:
+        model = Todo
+        fields = ('done',)
+
+
+class TodoCreateSerializer(TodoSerializer):
+    user_id = serializers.IntegerField(write_only=True)
+    name = serializers.CharField(read_only=True)
+    todo = serializers.CharField(source='name', write_only=True)
 
     class Meta:
         model = Todo
-        fields = ['name', 'done', 'date_created']
+        fields = TodoSerializer.Meta.fields + \
+            ('name', 'date_created', 'user_id', 'todo')
+
+
+class TodoUpdateSerializer(TodoSerializer):
+    todo_id = serializers.IntegerField(source='id')
+    todo = serializers.CharField(source='name')
+
+    class Meta:
+        model = Todo
+        fields = TodoSerializer.Meta.fields + ('todo_id', 'todo')
+
+
+class UserTodoSerializer(TodoUpdateSerializer):
+    user_id = serializers.IntegerField(write_only=True)
+
+    class Meta:
+        model = Todo
+        fields = TodoUpdateSerializer.Meta.fields + ('user_id', )
 
 
 class UserTodoDateSerializer(serializers.ModelSerializer):
