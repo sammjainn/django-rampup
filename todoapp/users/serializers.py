@@ -15,26 +15,29 @@ class UserIdSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', )
-        
-        
+
+
 class BaseUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('first_name', 'last_name', 'email')
-        
+
+
 class UserTodosBaseSerializer(BaseUserSerializer):
     completed_count = serializers.IntegerField()
     pending_count = serializers.IntegerField()
-    
+
     class Meta:
         model = User
-        fields = BaseUserSerializer.Meta.fields + ('pending_count', 'completed_count')
-        
-        
+        fields = BaseUserSerializer.Meta.fields + \
+            ('pending_count', 'completed_count')
+
+
 class UserDetailSerializer(UserIdSerializer, BaseUserSerializer):
     class Meta:
         model = User
-        fields = tuple(set(UserIdSerializer.Meta.fields + BaseUserSerializer.Meta.fields))
+        fields = tuple(set(UserIdSerializer.Meta.fields +
+                       BaseUserSerializer.Meta.fields))
 
 
 class UserCompletedSerializer(UserDetailSerializer):
@@ -58,4 +61,17 @@ class UserTodosSerializer(UserCompletedSerializer, UserPendingSerializer):
         model = User
         fields = list(set(UserCompletedSerializer.Meta.fields +
                       UserPendingSerializer.Meta.fields))
-        
+
+
+class UserCreateSerializer(BaseUserSerializer):
+    password = serializers.CharField(write_only=True)
+    date_joined = serializers.DateTimeField(read_only=True)
+    token = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = User
+        fields = BaseUserSerializer.Meta.fields + \
+            ('password', 'date_joined', 'token')
+
+    def get_token(self, obj):
+        return Token.objects.get(user=obj).key
