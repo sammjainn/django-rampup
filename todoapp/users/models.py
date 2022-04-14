@@ -8,6 +8,12 @@ from django.contrib.auth.models import PermissionsMixin
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth import get_user_model
+
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from rest_framework.authtoken.models import Token
 
 
 class UserManager(BaseUserManager):
@@ -51,9 +57,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     """
 
     email = models.EmailField(unique=True, max_length=255)
-    is_superuser = models.BooleanField()
+    is_superuser = models.BooleanField(default=False)
     first_name = models.CharField(max_length=30)
-    is_staff = models.BooleanField()
+    is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(
         default=timezone.now, null=True)
     last_name = models.CharField(max_length=150, blank=True)
@@ -64,3 +70,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+
+
+@receiver(post_save, sender=get_user_model())
+def create_auth_token(sender, instance=None, created=False, **kwargs):
+    if created:
+        Token.objects.create(user=instance)
