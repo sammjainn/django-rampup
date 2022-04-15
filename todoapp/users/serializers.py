@@ -75,7 +75,6 @@ class UserCreateSerializer(BaseUserSerializer):
         return Token.objects.get(user=obj).key
 
     def create(self, validated_data):
+        validated_data['password'] = make_password(validated_data['password'])
         instance = User.objects.create(**validated_data)
-        instance.set_password(make_password(validated_data['password']))
-        instance.save()
         return instance
