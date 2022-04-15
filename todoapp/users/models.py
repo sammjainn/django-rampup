@@ -1,6 +1,4 @@
 from __future__ import unicode_literals
-from email.policy import default
-from multiprocessing.sharedctypes import Value
 
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import BaseUserManager
