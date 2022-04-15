@@ -31,8 +31,8 @@ class TodoAPIViewSet(ModelViewSet):
 
     def get_serializer_class(self):
         if self.action == 'create':
-            if self.request.data.get('user_id'):
-                return TodoCreateSerializer
+            return TodoCreateSerializer
+        elif self.action == 'update':
             return TodoUpdateSerializer
         elif self.action == 'list' or self.action == 'retrieve':
             return UserTodoSerializer
@@ -45,3 +45,7 @@ class TodoAPIViewSet(ModelViewSet):
             id = self.kwargs.get(self.lookup_url_kwarg)
             return Todo.objects.filter(id=id)
         return Todo.objects.all()
+
+    def get_object(self):
+        todo_id = self.request.data.get('todo_id')
+        return Todo.objects.filter(id=todo_id).first()
