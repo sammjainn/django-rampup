@@ -1,5 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework.exceptions import ValidationError
+from django.contrib.auth.hashers import make_password
+
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 
@@ -117,3 +119,8 @@ class UserLoginSerializer(serializers.Serializer):
         if user is None:
             raise ValidationError('Incorrect email')
         return data
+
+    def create(self, validated_data):
+        validated_data['password'] = make_password(validated_data['password'])
+        instance = User.objects.create(**validated_data)
+        return instance

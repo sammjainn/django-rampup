@@ -12,7 +12,7 @@ from users.serializers import UserCreateSerializer, UserLoginSerializer
 User = get_user_model()
 
 
-class UserRegistrationAPIView(ModelViewSet):
+class UserRegistrationAPIView(CreateAPIView):
     '''
     View for registering user
     '''
@@ -28,7 +28,6 @@ class UserRegistrationAPIView(ModelViewSet):
     """
     authentication_classes = []
     permission_classes = [AllowAny]
-    http_method_names = ['post']
     serializer_class = UserCreateSerializer
 
 
