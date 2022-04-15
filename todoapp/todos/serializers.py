@@ -40,6 +40,14 @@ class TodoUpdateSerializer(TodoSerializer):
     class Meta:
         model = Todo
         fields = TodoSerializer.Meta.fields + ('todo_id', 'todo')
+        
+    def create(self, validated_data):
+        instance = Todo.objects.get(id=validated_data['id'])
+        instance.id = validated_data['id']
+        instance.name = validated_data['name']
+        instance.done = validated_data['done']
+        instance.save()
+        return instance
 
 
 class UserTodoSerializer(TodoUpdateSerializer):
