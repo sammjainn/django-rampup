@@ -1,10 +1,10 @@
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.generics import CreateAPIView
 
 from users.serializers import UserCreateSerializer
 
 
-class UserRegistrationAPIView(ModelViewSet):
+class UserRegistrationAPIView(CreateAPIView):
     """
         success response format
          {
@@ -17,7 +17,6 @@ class UserRegistrationAPIView(ModelViewSet):
     """
     authentication_classes = []
     permission_classes = []
-    http_method_names = ['post']
     serializer_class = UserCreateSerializer
 
 

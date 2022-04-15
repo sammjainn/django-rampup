@@ -1,7 +1,5 @@
-from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
-from django.utils.translation import ugettext_lazy as _
 
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
@@ -75,3 +73,9 @@ class UserCreateSerializer(BaseUserSerializer):
 
     def get_token(self, obj):
         return Token.objects.get(user=obj).key
+
+    def create(self, validated_data):
+        instance = User.objects.create(**validated_data)
+        instance.set_password(make_password(validated_data['password']))
+        instance.save()
+        return instance
