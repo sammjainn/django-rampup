@@ -1,11 +1,15 @@
 from rest_framework.viewsets import ModelViewSet
-
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import AllowAny
 from todos.serializers import *
 
 from todos.models import Todo
 
 
 class TodoAPIViewSet(ModelViewSet):
+    '''
+    View for editing, viewing, deleting Todos
+    '''
     """
         success response for create/update/get
         {
@@ -23,8 +27,8 @@ class TodoAPIViewSet(ModelViewSet):
           }
         ]
     """
-    authentication_classes = []
-    permission_classes = []
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [AllowAny]
     http_method_names = ['post', 'get', 'put', 'delete']
 
     def get_serializer_class(self):
