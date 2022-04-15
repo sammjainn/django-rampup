@@ -6,5 +6,5 @@ app_name = 'users'
 urlpatterns = [
     path('users/',
          UserRegistrationAPIView.as_view({'post': 'create'}), name="register"),
-    # path('users/login/', UserLoginAPIView.as_view(), name="login"),
+    path('users/login/', UserLoginAPIView.as_view(), name="login"),
 ]

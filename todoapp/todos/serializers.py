@@ -3,10 +3,13 @@ from rest_framework import serializers
 from users.serializers import BaseUserSerializer
 from todos.models import Todo
 
-# Add your serializer(s) here
+# Serializers for the Todo model
 
 
 class BaseTodoSerializer(serializers.ModelSerializer):
+    '''
+    Serializer for Todo details
+    '''
     status = serializers.CharField()
     created_at = serializers.DateTimeField(source="date_created")
     creator = BaseUserSerializer(source='user')
@@ -17,12 +20,18 @@ class BaseTodoSerializer(serializers.ModelSerializer):
 
 
 class TodoSerializer(serializers.ModelSerializer):
+    '''
+    Serializer for Todo details and status
+    '''
     class Meta:
         model = Todo
         fields = ('done',)
 
 
 class TodoCreateSerializer(TodoSerializer):
+    '''
+    Serializer for creating a Todo
+    '''
     user_id = serializers.IntegerField(write_only=True)
     name = serializers.CharField(read_only=True)
     todo = serializers.CharField(source='name', write_only=True)
@@ -34,6 +43,9 @@ class TodoCreateSerializer(TodoSerializer):
 
 
 class TodoUpdateSerializer(TodoSerializer):
+    '''
+    Serializer for updating a Todo
+    '''
     todo_id = serializers.IntegerField(source='id')
     todo = serializers.CharField(source='name')
 
@@ -43,6 +55,9 @@ class TodoUpdateSerializer(TodoSerializer):
 
 
 class UserTodoSerializer(TodoUpdateSerializer):
+    '''
+    Serializer for Todo details and user ID
+    '''
     user_id = serializers.IntegerField(write_only=True)
 
     class Meta:
@@ -51,6 +66,9 @@ class UserTodoSerializer(TodoUpdateSerializer):
 
 
 class UserTodoDateSerializer(serializers.ModelSerializer):
+    '''
+    Serializer for Todo and creator details
+    '''
     created_at = serializers.DateTimeField(source="date_created")
     status = serializers.CharField()
     creator = serializers.SerializerMethodField()
@@ -61,4 +79,7 @@ class UserTodoDateSerializer(serializers.ModelSerializer):
         fields = ['id', 'creator', 'email', 'name', 'status', 'created_at']
 
     def get_creator(self, obj):
+        '''
+        Creator name for Todo
+        '''
         return obj.user.first_name + ' ' + obj.user.last_name

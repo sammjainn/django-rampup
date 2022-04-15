@@ -4,9 +4,7 @@ from todos.views import TodoAPIViewSet
 
 app_name = 'todos'
 
-
 router = routers.DefaultRouter()
-
 
 router.register(r'todos', TodoAPIViewSet, 'todos')
 
