@@ -1,7 +1,5 @@
-from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
-from django.utils.translation import ugettext_lazy as _
 
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
@@ -15,26 +13,29 @@ class UserIdSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', )
-        
-        
+
+
 class BaseUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('first_name', 'last_name', 'email')
-        
+
+
 class UserTodosBaseSerializer(BaseUserSerializer):
     completed_count = serializers.IntegerField()
     pending_count = serializers.IntegerField()
-    
+
     class Meta:
         model = User
-        fields = BaseUserSerializer.Meta.fields + ('pending_count', 'completed_count')
-        
-        
+        fields = BaseUserSerializer.Meta.fields + \
+            ('pending_count', 'completed_count')
+
+
 class UserDetailSerializer(UserIdSerializer, BaseUserSerializer):
     class Meta:
         model = User
-        fields = tuple(set(UserIdSerializer.Meta.fields + BaseUserSerializer.Meta.fields))
+        fields = tuple(set(UserIdSerializer.Meta.fields +
+                       BaseUserSerializer.Meta.fields))
 
 
 class UserCompletedSerializer(UserDetailSerializer):
@@ -58,4 +59,22 @@ class UserTodosSerializer(UserCompletedSerializer, UserPendingSerializer):
         model = User
         fields = list(set(UserCompletedSerializer.Meta.fields +
                       UserPendingSerializer.Meta.fields))
-        
+
+
+class UserCreateSerializer(BaseUserSerializer):
+    password = serializers.CharField(write_only=True)
+    date_joined = serializers.DateTimeField(read_only=True)
+    token = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = User
+        fields = BaseUserSerializer.Meta.fields + \
+            ('password', 'date_joined', 'token')
+
+    def get_token(self, obj):
+        return Token.objects.get(user=obj).key
+
+    def create(self, validated_data):
+        validated_data['password'] = make_password(validated_data['password'])
+        instance = User.objects.create(**validated_data)
+        return instance
