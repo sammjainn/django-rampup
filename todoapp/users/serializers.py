@@ -114,7 +114,7 @@ class UserLoginSerializer(serializers.Serializer):
     '''
     email = serializers.EmailField(write_only=True)
     password = serializers.CharField(write_only=True)
-    token = serializers.SerializerMethodField()
+    auth_token = serializers.SerializerMethodField()
 
     def validate(self, data):
         '''
@@ -130,7 +130,7 @@ class UserLoginSerializer(serializers.Serializer):
 
         return data
 
-    def get_token(self, instance):
+    def get_auth_token(self, instance):
         user = User.objects.get(email=instance['email'])
         token, created = Token.objects.get_or_create(user=user)
         return token.key
