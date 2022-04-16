@@ -49,8 +49,4 @@ class UserLoginAPIView(CreateAPIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.data
-        user = authenticate(email=data['email'], password=data['password'])
-        if user is None:
-            raise ValidationError('Incorrect password')
-        token, created = Token.objects.get_or_create(user=user)
-        return Response({'auth_token': token.key}, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
