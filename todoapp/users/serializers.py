@@ -1,7 +1,6 @@
-from django.contrib.auth import get_user_model
-from rest_framework.exceptions import ValidationError
 from django.contrib.auth.hashers import make_password
-
+from django.contrib.auth import authenticate, get_user_model
+from rest_framework.exceptions import ValidationError
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 
@@ -95,32 +94,43 @@ class UserCreateSerializer(BaseUserSerializer):
         model = User
         fields = BaseUserSerializer.Meta.fields + \
             ('password', 'date_joined', 'token')
+        extra_kwargs = {'first_name': {'required': False},
+                        'last_name': {'required': False}}
 
     def get_token(self, obj):
         '''
         Generate token on registration
         '''
-        return Token.objects.get(user=obj).key
+        return Token.objects.get_or_create(user=obj)[0].key
+
+    def validate(self, data):
+        data['password'] = make_password(data['password'])
+        return data
 
 
 class UserLoginSerializer(serializers.Serializer):
     '''
     Serializer for User Login
     '''
-    email = serializers.EmailField()
-    password = serializers.CharField()
+    email = serializers.EmailField(write_only=True)
+    password = serializers.CharField(write_only=True)
+    auth_token = serializers.SerializerMethodField()
 
     def validate(self, data):
         '''
         Validate credentials on login
         '''
-        print(data['email'], data['password'])
-        user = User.objects.filter(email=data['email'])
+        email = data.get('email', None)
+        password = data.get('password', None)
+
+        user = authenticate(email=email, password=password)
+
         if user is None:
-            raise ValidationError('Incorrect email')
+            raise ValidationError('Incorrect credentials')
+
         return data
 
-    def create(self, validated_data):
-        validated_data['password'] = make_password(validated_data['password'])
-        instance = User.objects.create(**validated_data)
-        return instance
+    def get_auth_token(self, instance):
+        user = User.objects.get(email=instance['email'])
+        token, created = Token.objects.get_or_create(user=user)
+        return token.key

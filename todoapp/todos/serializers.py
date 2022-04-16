@@ -31,14 +31,17 @@ class TodoCreateSerializer(TodoSerializer):
     '''
     Serializer for creating a Todo
     '''
-    user_id = serializers.IntegerField(write_only=True)
     name = serializers.CharField(read_only=True)
     todo = serializers.CharField(source='name', write_only=True)
 
     class Meta:
         model = Todo
         fields = TodoSerializer.Meta.fields + \
-            ('name', 'date_created', 'user_id', 'todo')
+            ('name', 'date_created', 'todo', 'done')
+
+    def validate(self, data):
+        data['user'] = self.context['request'].user
+        return data
 
 
 class TodoUpdateSerializer(TodoSerializer):
