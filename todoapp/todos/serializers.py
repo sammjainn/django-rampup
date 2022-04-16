@@ -51,12 +51,11 @@ class TodoUpdateSerializer(TodoSerializer):
     class Meta:
         model = Todo
         fields = TodoSerializer.Meta.fields + ('todo_id', 'todo')
-        
-    def create(self, validated_data):
-        instance = Todo.objects.get(id=validated_data['id'])
-        instance.id = validated_data['id']
-        instance.name = validated_data['name']
-        instance.done = validated_data['done']
+
+    def update(self, instance, validated_data):
+        instance.id = validated_data.get('id', instance.id)
+        instance.name = validated_data.get('name', instance.name)
+        instance.done = validated_data.get('done', instance.done)
         instance.save()
         return instance
 
