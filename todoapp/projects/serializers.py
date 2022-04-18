@@ -1,7 +1,18 @@
+from http.client import responses
+from django.contrib.auth import get_user_model
+from django.contrib.postgres.aggregates import *
+from django.db.models import Q
+from requests import request
 from rest_framework import serializers
+from rest_framework.response import Response
+from rest_framework import status
+from django.db import connection, reset_queries
 
-from projects.models import Project
+
+from projects.models import Project, ProjectMember
 from users.serializers import UserTodosBaseSerializer
+
+User = get_user_model()
 
 # Serializers for the Project model
 
@@ -56,3 +67,76 @@ class ProjectDetailSerializer(BaseProjectSerializer):
         Readable name for status choice
         '''
         return obj.get_status_display()
+
+
+class AddMemberSerializer(serializers.ModelSerializer):
+    user_ids = serializers.ListField(write_only=True)
+    logs = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Project
+        fields = ['user_ids', 'logs']
+
+    def validate(self, data):
+        project_id = self.context['view'].kwargs.get('id')
+        project = Project.objects.filter(id=project_id)
+
+        if not project.exists():
+            raise serializers.ValidationError("No such project")
+        return data
+
+    def create(self, validated_data):
+        project_id = self.context['view'].kwargs.get('id')
+        user_ids = self.context['request'].data.get('user_ids')
+
+        response = {}
+        project = Project.objects.get(id=project_id)
+        project_max_members = project.max_members
+
+        user_projects = User.objects.filter(id__in=user_ids).annotate(
+            projects=ArrayAgg('project__id')).values('id', 'projects')
+
+        user_projects = {u['id']: u['projects'] for u in user_projects}
+
+        project_member_count = len(
+            [id for id in user_projects if project_id in user_projects[id]])
+
+        flag = 0
+        users_to_be_added = []
+
+        for id in user_ids:
+            if not user_projects.__contains__(id):
+                response[id] = "No such user"
+                continue
+
+            if project_member_count >= project_max_members:
+                response[id] = "Max member limit for project reached"
+                flag = 1
+                break
+
+            user_project_count = len(user_projects[id])
+            if user_project_count >= 2:
+                response[id] = "Cannot add as User is a member in two projects"
+                continue
+
+            if project_id in user_projects[id]:
+                response[id] = "User is already a Member"
+                continue
+
+            users_to_be_added.append(id)
+            response[id] = "Member added Successfully"
+            project_member_count += 1
+
+        project.members.add(*users_to_be_added)
+
+        if flag == 1:
+            for id in user_ids:
+                if id not in response:
+                    response[id] = "Max member limit for project reached"
+
+        validated_data['logs'] = response
+
+        return validated_data
+
+    def get_logs(self, data):
+        return data['logs']

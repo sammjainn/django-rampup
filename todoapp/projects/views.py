@@ -1,4 +1,13 @@
-class ProjectMemberApiViewSet():
+from django.shortcuts import get_object_or_404
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.viewsets import ModelViewSet
+from projects.serializers import AddMemberSerializer
+from projects.models import Project
+from rest_framework.permissions import AllowAny
+
+
+class ProjectMemberApiViewSet(ModelViewSet):
     """
        constraints
         - a user can be a member of max 2 projects only
@@ -35,3 +44,8 @@ class ProjectMemberApiViewSet():
 
          there will be many other cases think of that and share on forum
     """
+
+    authentication_classes = []
+    permission_classes = [AllowAny]
+    lookup_url_kwarg = 'id'
+    serializer_class = AddMemberSerializer
