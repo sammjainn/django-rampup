@@ -1,4 +1,5 @@
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import AllowAny
 from django.shortcuts import get_object_or_404
 
@@ -8,6 +9,9 @@ from todos.models import Todo
 
 
 class TodoAPIViewSet(ModelViewSet):
+    '''
+    View for editing, viewing, deleting Todos
+    '''
     """
         success response for create/update/get
         {
@@ -25,7 +29,7 @@ class TodoAPIViewSet(ModelViewSet):
           }
         ]
     """
-    authentication_classes = []
+    authentication_classes = [TokenAuthentication]
     permission_classes = [AllowAny]
     lookup_url_kwarg = 'id'
 
