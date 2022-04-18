@@ -1,16 +1,9 @@
-from http.client import responses
 from django.contrib.auth import get_user_model
 from django.contrib.postgres.aggregates import *
-from django.db.models import Q
-from requests import request
 from rest_framework import serializers
-from rest_framework.response import Response
-from rest_framework import status
-from django.db import connection, reset_queries
-
-
-from projects.models import Project, ProjectMember
 from users.serializers import UserTodosBaseSerializer
+
+from projects.models import Project
 
 User = get_user_model()
 
@@ -168,10 +161,6 @@ class RemoveMemberSerializer(serializers.ModelSerializer):
 
         users = User.objects.filter(id__in=user_ids).values('id')
         users = [u['id'] for u in users]
-
-        # user hai hi nhi project mein
-        # project mein users hi nhi hain
-        # removed successfully
 
         limit_reached = 0
         users_to_be_removed = []

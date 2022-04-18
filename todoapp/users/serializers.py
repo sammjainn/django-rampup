@@ -1,8 +1,8 @@
-from django.contrib.auth.hashers import make_password
 from django.contrib.auth import authenticate, get_user_model
-from rest_framework.exceptions import ValidationError
+from django.contrib.auth.hashers import make_password
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
+from rest_framework.exceptions import ValidationError
 
 User = get_user_model()
 

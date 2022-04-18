@@ -1,10 +1,10 @@
-from rest_framework.viewsets import ModelViewSet
-from rest_framework.authentication import TokenAuthentication
 from django.shortcuts import get_object_or_404
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.viewsets import ModelViewSet
 
-from todos.serializers import *
 from todos.models import Todo
 from todos.permissions import UserTodoPermissions
+from todos.serializers import *
 
 
 class TodoAPIViewSet(ModelViewSet):

@@ -1,10 +1,11 @@
 from django.db.models import Count
-from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.viewsets import ModelViewSet
-from projects.serializers import AddMemberSerializer, RemoveMemberSerializer
-from projects.models import Project
 from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet
+
+from projects.models import Project
+from projects.serializers import AddMemberSerializer, RemoveMemberSerializer
 
 
 class ProjectMemberApiViewSet(ModelViewSet):

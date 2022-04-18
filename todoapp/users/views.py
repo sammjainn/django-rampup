@@ -1,11 +1,8 @@
-from django.forms import ValidationError
-from django.contrib.auth import authenticate, get_user_model
-from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
-from rest_framework.viewsets import ModelViewSet
-from rest_framework.authtoken.models import Token
-from rest_framework.generics import CreateAPIView
+from django.contrib.auth import get_user_model
 from rest_framework import status
+from rest_framework.generics import CreateAPIView
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
 
 from users.serializers import UserCreateSerializer, UserLoginSerializer
 

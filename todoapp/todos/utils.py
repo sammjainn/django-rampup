@@ -1,16 +1,17 @@
+import datetime
 import json
-from rest_framework import serializers
-from django.db.models import When, Value, BooleanField, Case, Prefetch, Q, Count, CharField
+
 from django.contrib.auth import get_user_model
 from django.contrib.postgres.aggregates import *
-
+from django.db.models import (BooleanField, Case, CharField, Count, Prefetch,
+                              Q, Value, When)
 from projects.models import Project
-from todos.models import Todo
-
-from users.serializers import *
-from todos.serializers import *
 from projects.serializers import *
-import datetime
+from rest_framework import serializers
+from users.serializers import *
+
+from todos.models import Todo
+from todos.serializers import *
 
 User = get_user_model()
 

@@ -1,5 +1,7 @@
+from django.contrib.auth import get_user_model
 from django.db import models
-from django.conf import settings
+
+User = get_user_model()
 
 
 class Project(models.Model):
@@ -13,8 +15,7 @@ class Project(models.Model):
         Add string representation for this model with project name.
     """
 
-    members = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, through='ProjectMember')
+    members = models.ManyToManyField(User, through='ProjectMember')
     name = models.CharField(max_length=100, blank=True)
     max_members = models.PositiveIntegerField(default=0)
 
@@ -44,8 +45,7 @@ class ProjectMember(models.Model):
     """
 
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    member = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    member = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.member.first_name + ' ' + self.member.email
