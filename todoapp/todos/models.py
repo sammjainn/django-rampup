@@ -1,8 +1,11 @@
 from __future__ import unicode_literals
 
+from datetime import datetime
+
+from django.contrib.auth import get_user_model
 from django.db import models
-from django.utils.encoding import smart_text as smart_unicode
-from django.utils.translation import ugettext_lazy as _
+
+User = get_user_model()
 
 
 class Todo(models.Model):
@@ -16,3 +19,18 @@ class Todo(models.Model):
 
         Add string representation for this model with todos name.
     """
+
+    user = models.ForeignKey(User,
+                             on_delete=models.CASCADE)
+    name = models.CharField(max_length=1000)
+    done = models.BooleanField(default=False)
+    date_created = models.DateTimeField(default=datetime.now)
+    date_completed = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return self.name
+
+    def set_done(self):
+        self.done = True
+        self.date_completed = datetime.now()
+        self.save()
