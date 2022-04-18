@@ -1,8 +1,8 @@
-from django.shortcuts import get_object_or_404
+from django.db.models import Count
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.viewsets import ModelViewSet
-from projects.serializers import AddMemberSerializer
+from projects.serializers import AddMemberSerializer, RemoveMemberSerializer
 from projects.models import Project
 from rest_framework.permissions import AllowAny
 
@@ -49,3 +49,18 @@ class ProjectMemberApiViewSet(ModelViewSet):
     permission_classes = [AllowAny]
     lookup_url_kwarg = 'id'
     serializer_class = AddMemberSerializer
+
+    def get_object(self):
+        id = self.kwargs.get(self.lookup_url_kwarg)
+        object = Project.objects.filter(id=id).annotate(count=Count('members'))
+
+        if object.exists():
+            return object.first()
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    def get_serializer_class(self):
+        type = self.kwargs.get('type')
+        if type == 'add-users':
+            return AddMemberSerializer
+        elif type == 'remove-users':
+            return RemoveMemberSerializer

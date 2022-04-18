@@ -85,23 +85,20 @@ class AddMemberSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("No such project")
         return data
 
-    def create(self, validated_data):
-        project_id = self.context['view'].kwargs.get('id')
+    def update(self, project, validated_data):
+        project_id = project.id
         user_ids = self.context['request'].data.get('user_ids')
 
         response = {}
-        project = Project.objects.get(id=project_id)
         project_max_members = project.max_members
+        project_member_count = project.members.count()
 
         user_projects = User.objects.filter(id__in=user_ids).annotate(
             projects=ArrayAgg('project__id')).values('id', 'projects')
 
         user_projects = {u['id']: u['projects'] for u in user_projects}
 
-        project_member_count = len(
-            [id for id in user_projects if project_id in user_projects[id]])
-
-        flag = 0
+        limit_reached = 0
         users_to_be_added = []
 
         for id in user_ids:
@@ -111,7 +108,7 @@ class AddMemberSerializer(serializers.ModelSerializer):
 
             if project_member_count >= project_max_members:
                 response[id] = "Max member limit for project reached"
-                flag = 1
+                limit_reached = 1
                 break
 
             user_project_count = len(user_projects[id])
@@ -129,10 +126,80 @@ class AddMemberSerializer(serializers.ModelSerializer):
 
         project.members.add(*users_to_be_added)
 
-        if flag == 1:
+        if limit_reached == 1:
             for id in user_ids:
                 if id not in response:
                     response[id] = "Max member limit for project reached"
+
+        validated_data['logs'] = response
+
+        return validated_data
+
+    def get_logs(self, data):
+        return data['logs']
+
+
+class RemoveMemberSerializer(serializers.ModelSerializer):
+    user_ids = serializers.ListField(write_only=True)
+    logs = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Project
+        fields = ['user_ids', 'logs']
+
+    def validate(self, data):
+        project_id = self.context['view'].kwargs.get('id')
+        project = Project.objects.filter(id=project_id)
+
+        if not project.exists():
+            raise serializers.ValidationError("No such project")
+        return data
+
+    def update(self, project, validated_data):
+        project_id = project.id
+        user_ids = self.context['request'].data.get('user_ids')
+
+        response = {}
+        project_member_count = project.count
+
+        project_members = list(project.members.values('id'))
+
+        project_members = [member['id'] for member in project_members]
+
+        users = User.objects.filter(id__in=user_ids).values('id')
+        users = [u['id'] for u in users]
+
+        # user hai hi nhi project mein
+        # project mein users hi nhi hain
+        # removed successfully
+
+        limit_reached = 0
+        users_to_be_removed = []
+
+        for id in user_ids:
+            if id not in users:
+                response[id] = "No such user"
+                continue
+
+            if project_member_count == 0:
+                response[id] = "Project has no more members"
+                limit_reached = 1
+                break
+
+            if id not in project_members:
+                response[id] = "Cannot add as User is not a Member"
+                continue
+
+            users_to_be_removed.append(id)
+            response[id] = "Member removed Successfully"
+            project_member_count -= 1
+
+        project.members.remove(*users_to_be_removed)
+
+        if limit_reached == 1:
+            for id in user_ids:
+                if id not in response:
+                    response[id] = "Project has no more members"
 
         validated_data['logs'] = response
 
