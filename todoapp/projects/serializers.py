@@ -2,7 +2,6 @@ from django.contrib.auth import get_user_model
 from django.contrib.postgres.aggregates import *
 from rest_framework import serializers
 from users.serializers import UserTodosBaseSerializer
-
 from projects.models import Project
 
 User = get_user_model()
@@ -63,6 +62,9 @@ class ProjectDetailSerializer(BaseProjectSerializer):
 
 
 class AddMemberSerializer(serializers.ModelSerializer):
+    '''
+    Serializer for adding members to Project
+    '''
     user_ids = serializers.ListField(write_only=True)
     logs = serializers.SerializerMethodField()
 
@@ -133,6 +135,9 @@ class AddMemberSerializer(serializers.ModelSerializer):
 
 
 class RemoveMemberSerializer(serializers.ModelSerializer):
+    '''
+    Serializer for removing members from Project
+    '''
     user_ids = serializers.ListField(write_only=True)
     logs = serializers.SerializerMethodField()
 
@@ -149,7 +154,6 @@ class RemoveMemberSerializer(serializers.ModelSerializer):
         return data
 
     def update(self, project, validated_data):
-        project_id = project.id
         user_ids = self.context['request'].data.get('user_ids')
 
         response = {}
@@ -176,7 +180,7 @@ class RemoveMemberSerializer(serializers.ModelSerializer):
                 break
 
             if id not in project_members:
-                response[id] = "Cannot add as User is not a Member"
+                response[id] = "Cannot remove as User is not a Member"
                 continue
 
             users_to_be_removed.append(id)

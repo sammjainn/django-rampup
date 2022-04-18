@@ -2,8 +2,10 @@ from __future__ import unicode_literals
 
 from datetime import datetime
 
-from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.db import models
+
+User = get_user_model()
 
 
 class Todo(models.Model):
@@ -18,7 +20,7 @@ class Todo(models.Model):
         Add string representation for this model with todos name.
     """
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+    user = models.ForeignKey(User,
                              on_delete=models.CASCADE)
     name = models.CharField(max_length=1000)
     done = models.BooleanField(default=False)
